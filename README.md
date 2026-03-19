@@ -26,11 +26,20 @@ Bu sistem, Instagram DM gruplarınızda paylaşılan **Reels**, **Gönderi** ve 
 
 ## Kurulum
 
-```bash
-# Bağımlılıkları kurun
-pip install -r requirements.txt
+**Yöntem 1 — Setup Scripti (Önerilen)**
 
-# Uygulamayı başlatın
+```bash
+curl -sL https://raw.githubusercontent.com/seghobs/isimalv4-premium/master/setup.sh | bash
+```
+
+Tüm dosyalar `mysite/` klasörüne kopyalanır.
+
+**Yöntem 2 — Manuel**
+
+```bash
+git clone https://github.com/seghobs/isimalv4-premium.git
+cd isimalv4-premium
+pip install -r requirements.txt
 python app.py
 ```
 
