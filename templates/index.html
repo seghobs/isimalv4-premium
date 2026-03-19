@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Medya Analizi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(25, 25, 45, 0.6);
+            --gradient-dark-1: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            --gradient-dark-2: linear-gradient(135deg, #232333 0%, #3a3a5a 100%);
+            --gradient-dark-3: linear-gradient(135deg, #1f1f2e 0%, #35354a 100%);
+            --gradient-dark-4: linear-gradient(135deg, #1c1c28 0%, #2e2e3e 100%);
+            --gradient-accent: linear-gradient(135deg, #3a3a5a 0%, #4a4a6a 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8b3;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(50, 50, 70, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(245, 87, 108, 0.15) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 1s ease;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #888 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 40px rgba(100, 100, 120, 0.3);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            animation: fadeInUp 1s ease;
+            position: relative;
+            z-index: 10000;
+            overflow: visible;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 10001;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: visible;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Custom Dropdown Styling */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            z-index: 10002;
+        }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.2rem;
+            background: var(--gradient-dark-1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10002;
+        }
+
+        .dropdown-header.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, rgba(80, 80, 80, 0.1) 0%, rgba(100, 100, 100, 0.1) 100%);
+            border-color: rgba(150, 150, 150, 0.3);
+        }
+
+        .dropdown-header.disabled:hover {
+            border-color: rgba(150, 150, 150, 0.3);
+            background: linear-gradient(135deg, rgba(80, 80, 80, 0.1) 0%, rgba(100, 100, 100, 0.1) 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .dropdown-header:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--gradient-dark-2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .dropdown-header.active {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: var(--gradient-accent);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .dropdown-selected {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .dropdown-selected i {
+            color: #888;
+        }
+
+        .dropdown-arrow {
+            display: flex;
+            align-items: center;
+            color: #888;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-header.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(20, 20, 35, 0.98) 0%, rgba(25, 25, 45, 0.98) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 10003;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-list.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            padding-left: 1.5rem;
+        }
+
+        .dropdown-item.selected {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border-left: 3px solid #667eea;
+        }
+
+        .dropdown-item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex: 1;
+        }
+
+        .dropdown-item-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+
+        .dropdown-item-text {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .dropdown-item-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .dropdown-item-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .dropdown-item-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.7rem;
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.2) 0%, rgba(56, 249, 215, 0.2) 100%);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #9cefb7;
+        }
+
+        .dropdown-search {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            background: inherit;
+        }
+
+        .dropdown-search-wrapper {
+            position: relative;
+        }
+
+        .dropdown-search-input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .dropdown-search-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .dropdown-search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            font-size: 0.9rem;
+            z-index: 1;
+        }
+
+        /* Custom scrollbar for dropdown */
+        .dropdown-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 3px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #7a8ff0, #8a5fb5);
+        }
+
+        /* Group count badge */
+        .group-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--gradient-dark-1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: var(--gradient-dark-2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn:disabled:hover {
+            transform: none !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .btn i {
+            margin-right: .5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-dark-1);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-dark-2);
+        }
+
+        .btn-copy {
+            background: var(--gradient-dark-3);
+        }
+
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .btn-copy:hover {
+            background: var(--gradient-accent);
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        /* Results Section */
+        .results {
+            display: none;
+            animation: fadeIn 1s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .stat-card.total {
+            background: var(--gradient-dark-1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-card.reels {
+            background: var(--gradient-dark-2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-card.posts {
+            background: var(--gradient-dark-3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-card.stories {
+            background: var(--gradient-dark-4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        /* Media List */
+        .media-list {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .media-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            overflow: visible;
+            word-wrap: break-word;
+        }
+
+        .media-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(5px);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .media-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-radius: 12px 0 0 12px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            opacity: 0.7;
+        }
+
+        /* Special cyan gradient border for users with exactly 2 shares */
+        .media-item.double-share {
+            border: 2px solid #00D4FF;
+            box-shadow: 0 0 20px rgba(0, 213, 255, 0.2);
+        }
+
+        .media-item.double-share:hover {
+            border-color: #00E5FF;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+        }
+
+        .media-item.double-share::before {
+            background: linear-gradient(180deg, #00E5FF, #0087CE);
+            opacity: 1;
+            width: 5px;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            }
+
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
+            }
+        }
+
+        .media-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .media-icon.reels {
+            background: var(--gradient-dark-1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .media-icon.post {
+            background: var(--gradient-dark-2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .media-icon.story {
+            background: var(--gradient-dark-3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .media-icon.media {
+            background: var(--gradient-dark-4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .media-content {
+            flex: 1;
+            min-width: 0;
+            overflow: visible;
+        }
+
+        .media-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: .6rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .media-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .3rem .6rem;
+            border-radius: 999px;
+            background: rgba(102, 126, 234, .15);
+            border: 1px solid rgba(102, 126, 234, .3);
+            font-size: .8rem;
+            color: #b8c7ff;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .media-type-badge i {
+            opacity: .9;
+        }
+
+        .media-type-badge.reels {
+            background: rgba(40, 40, 60, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #aaa;
+        }
+
+        .media-type-badge.post {
+            background: rgba(35, 35, 55, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #aaa;
+        }
+
+        .media-type-badge.story {
+            background: rgba(30, 30, 50, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #aaa;
+        }
+
+        .media-type-badge.media {
+            background: rgba(45, 45, 65, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #aaa;
+        }
+
+        .media-time {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .media-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .media-url {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            text-decoration: none;
+            color: #a0c4ff;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .media-url:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+            border-color: rgba(102, 126, 234, 0.5);
+            color: #c0d8ff;
+            transform: translateX(3px);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .media-url-icon {
+            font-size: 1rem;
+        }
+
+        .user-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            max-width: 100%;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .user-tag.sharer {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .user-tag.owner {
+            background: rgba(245, 87, 108, 0.2);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+        }
+
+        /* User Statistics */
+        .user-stats {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            overflow: visible;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .user-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .user-counts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .count-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .count-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .count-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 30px rgba(50, 50, 70, 0.6);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 0.8s ease-in-out 3;
+        }
+
+        /* Quick Date Buttons */
+        .quick-date-section {
+            margin-top: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-date-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .quick-date-label i {
+            font-size: 0.75rem;
+            color: #667eea;
+        }
+
+        .quick-date-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .quick-date-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .quick-date-btn:hover {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #b8c7ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .quick-date-btn.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+            border-color: rgba(102, 126, 234, 0.5);
+            color: #c8d5ff;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .quick-date-btn i {
+            font-size: 0.7rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .control-panel {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .user-counts {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            /* Haftalık katılım mobil düzenlemeleri */
+            .weekly-remove-btn {
+                width: 100%;
+                margin-top: 0.5rem;
+                justify-content: center;
+            }
+
+            .user-stat-item>div:first-child {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .user-stat-item>div:first-child>div:last-child {
+                margin-top: 1rem;
+                align-items: stretch;
+                width: 100%;
+            }
+
+            .quick-date-btns {
+                gap: 0.4rem;
+            }
+
+            .quick-date-btn {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 2000;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(249, 115, 22, 0.95) 100%);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.95) 0%, rgba(67, 160, 71, 0.95) 100%);
+        }
+
+        .toast i {
+            font-size: 1.2rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert.error {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+        }
+
+        .alert.success {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-dark-1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .scroll-to-top.active {
+            opacity: 0.9;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-to-top:hover {
+            background: var(--gradient-accent);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(50, 50, 70, 0.5);
+            opacity: 1;
+        }
+
+        .scroll-to-top i {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @media (max-width: 768px) {
+            .scroll-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-camera-retro" style="margin-right: .6rem;"></i>Instagram Medya Analizi</h1>
+            <p>Grup paylaşımlarını analiz edin ve içerik sahiplerini görün</p>
+            <div id="activeAccountBadge" style="display:none; margin-top: 0.8rem;">
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(67, 233, 123, 0.1); border: 1px solid rgba(67, 233, 123, 0.3); border-radius: 20px; font-size: 0.85rem; color: #43e97b;">
+                    <i class="fa-solid fa-circle" style="font-size: 0.5rem; animation: pulse-dot 2s ease infinite;"></i>
+                    <span>Aktif Hesap: <strong id="activeAccountName">-</strong></span>
+                </span>
+                <a href="/login" style="margin-left: 0.5rem; color: #667eea; font-size: 0.8rem; text-decoration: none;" title="Yeni hesap ekle">
+                    <i class="fa-solid fa-plus-circle"></i> Hesap Ekle
+                </a>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="control-grid">
+                <div class="form-group">
+                    <label for="groupSelect"><i class="fa-solid fa-people-group" style="margin-right:.5rem;"></i>Grup
+                        Seçin</label>
+                    <div class="custom-dropdown" id="customDropdown">
+                        <div class="dropdown-header disabled" id="dropdownHeader" onclick="toggleDropdown()">
+                            <div class="dropdown-selected">
+                                <i class="fa-solid fa-spinner fa-spin" id="dropdownIcon"></i>
+                                <span id="selectedText">Gruplar yükleniyor...</span>
+                            </div>
+                            <div class="dropdown-arrow">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="dropdown-list" id="dropdownList">
+                            <div class="dropdown-search">
+                                <div class="dropdown-search-wrapper">
+                                    <i class="fa-solid fa-search dropdown-search-icon"></i>
+                                    <input type="text" class="dropdown-search-input" placeholder="Grup ara..."
+                                        onkeyup="filterGroups(this.value)">
+                                </div>
+                            </div>
+                            <div id="groupsList"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="groupSelect" value="">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate"><i class="fa-regular fa-calendar-days"
+                            style="margin-right:.5rem;"></i>Başlangıç Tarihi</label>
+                    <input type="date" id="startDate" value="{{ today }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate"><i class="fa-regular fa-calendar-days" style="margin-right:.5rem;"></i>Bitiş
+                        Tarihi</label>
+                    <input type="date" id="endDate" value="{{ today }}">
+                </div>
+            </div>
+
+            <!-- Hızlı Tarih Seçimi -->
+            <div class="quick-date-section">
+                <div class="quick-date-label">
+                    <i class="fa-solid fa-bolt"></i> Hızlı Tarih Seçimi
+                </div>
+                <div class="quick-date-btns">
+                    <button class="quick-date-btn" onclick="setQuickDate(7, this)" title="Son 7 gün">
+                        <i class="fa-regular fa-calendar"></i> 1 Hafta
+                    </button>
+                    <button class="quick-date-btn" onclick="setQuickDate(10, this)" title="Son 10 gün (Instagram limiti)">
+                        <i class="fa-brands fa-instagram"></i> 10 Gün
+                    </button>
+                    <button class="quick-date-btn" onclick="setQuickDate(14, this)" title="Son 14 gün">
+                        <i class="fa-regular fa-calendar"></i> 2 Hafta
+                    </button>
+                    <button class="quick-date-btn" onclick="setQuickDate(30, this)" title="Son 30 gün">
+                        <i class="fa-solid fa-calendar-days"></i> 1 Ay
+                    </button>
+                    <button class="quick-date-btn" onclick="setQuickDate(90, this)" title="Son 90 gün">
+                        <i class="fa-solid fa-calendar-days"></i> 3 Ay
+                    </button>
+                    <button class="quick-date-btn" onclick="setQuickDate(0, this)" title="Sadece bugün">
+                        <i class="fa-solid fa-clock"></i> Bugün
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+
+                <button class="btn btn-secondary" onclick="analyzeWeeklyParticipation(event)"
+                    style="background: linear-gradient(135deg, #00bcd4 0%, #009688 100%);" id="analyzeButton">
+                    <i class="fa-solid fa-calendar-week"></i> Katılımları Analiz Et
+                </button>
+                <button class="btn btn-copy" onclick="copyUsernames()" style="display: none;" id="copyBtn">
+                    <i class="fa-regular fa-clipboard"></i> 30+ Eksik Gün Olanları Kopyala
+                </button>
+            </div>
+
+            <div class="alert error" id="errorAlert"></div>
+            <div class="alert success" id="successAlert"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analiz yapılıyor...</p>
+        </div>
+
+
+
+        <!-- Weekly Participation (Outside results div) -->
+        <div class="user-stats" id="weeklyParticipationSection" style="display: none; margin-top: 2rem;">
+            <h2 style="margin-bottom: 1.5rem; display:flex; align-items:center; gap:.6rem;">
+                <i class="fa-solid fa-calendar-week"></i> Katılım Analiz Sonucu
+            </h2>
+            <div id="weeklyStats" style="margin-bottom: 2rem;"></div>
+            <div id="membersList"></div>
+        </div>
+    </div>
+
+    <script>
+        let allUsernames = new Set();
+        let allGroups = [];
+        let selectedGroup = null;
+
+        // Set today's date
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+
+            // Initialize
+            initializeApp();
+        });
+
+        // Hızlı Tarih Seçimi
+        function setQuickDate(days, btnElement) {
+            const today = new Date();
+            const endDate = today.toISOString().split('T')[0];
+
+            let startDate;
+            if (days === 0) {
+                // Bugün
+                startDate = endDate;
+            } else {
+                const start = new Date(today);
+                start.setDate(start.getDate() - days);
+                startDate = start.toISOString().split('T')[0];
+            }
+
+            document.getElementById('startDate').value = startDate;
+            document.getElementById('endDate').value = endDate;
+
+            // Aktif buton stili
+            document.querySelectorAll('.quick-date-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            btnElement.classList.add('active');
+
+            // Kısa bildirim
+            const dayLabel = days === 0 ? 'Bugün' : `Son ${days} gün`;
+            showToast(`${dayLabel} seçildi: ${formatDateTR(startDate)} - ${formatDateTR(endDate)}`, 'success');
+        }
+
+        function formatDateTR(dateStr) {
+            const parts = dateStr.split('-');
+            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+
+        async function initializeApp() {
+            try {
+                // Aktif hesap bilgisini yükle
+                try {
+                    const accRes = await fetch('/api/active-account');
+                    const accData = await accRes.json();
+                    if (accData.active) {
+                        const badge = document.getElementById('activeAccountBadge');
+                        const nameEl = document.getElementById('activeAccountName');
+                        const label = accData.account_label || accData.username || 'Bilinmeyen';
+                        nameEl.textContent = accData.account_label ? `${accData.account_label} (@${accData.username})` : `@${accData.username}`;
+                        badge.style.display = 'block';
+                    }
+                } catch (e) {
+                    console.log('Hesap bilgisi yüklenemedi:', e);
+                }
+
+                // Initialize analyzer
+                const initResponse = await fetch('/api/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const initData = await initResponse.json();
+                if (initData.success) {
+                    console.log(`Logged in as: ${initData.username}`);
+
+                    // Load groups
+                    await loadGroups();
+                } else {
+                    showError('Başlatma hatası: ' + initData.error);
+                }
+            } catch (error) {
+                showError('Bağlantı hatası: ' + error.message);
+            }
+        }
+
+        async function loadGroups() {
+            // Show loading toast
+            showToast('Gruplar yükleniyor, lütfen bekleyin...', 'warning');
+
+            try {
+                const response = await fetch('/api/groups');
+                const data = await response.json();
+
+                if (data.groups) {
+                    allGroups = data.groups;
+                    renderGroups(allGroups);
+
+                    // Enable dropdown
+                    const header = document.getElementById('dropdownHeader');
+                    const icon = document.getElementById('dropdownIcon');
+                    const text = document.getElementById('selectedText');
+
+                    header.classList.remove('disabled');
+                    icon.className = 'fa-solid fa-users-rectangle';
+                    text.textContent = 'Grup seçin...';
+
+                    // Remove loading toast
+                    removeToast();
+                } else {
+                    showError('Gruplar yüklenemedi');
+                    removeToast();
+                }
+            } catch (error) {
+                showError('Grup yükleme hatası: ' + error.message);
+                removeToast();
+            }
+        }
+
+        function renderGroups(groups) {
+            const groupsList = document.getElementById('groupsList');
+            groupsList.innerHTML = '';
+
+            groups.forEach(group => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.onclick = () => selectGroup(group);
+
+                item.innerHTML = `
+                    <div class="dropdown-item-content">
+                        <div class="dropdown-item-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="dropdown-item-text">
+                            <div class="dropdown-item-title">${group.title}</div>
+                            <div class="dropdown-item-subtitle">${group.user_count} üye</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-item-badge">
+                        <i class="fa-solid fa-user-group"></i>
+                        ${group.user_count}
+                    </div>
+                `;
+
+                groupsList.appendChild(item);
+            });
+        }
+
+        function toggleDropdown() {
+            const header = document.getElementById('dropdownHeader');
+            const list = document.getElementById('dropdownList');
+            const dropdown = document.getElementById('customDropdown');
+            const controlPanel = document.querySelector('.control-panel');
+
+            // Don't open if disabled
+            if (header.classList.contains('disabled')) {
+                showToast('Gruplar henüz yüklenmedi, lütfen bekleyin...', 'warning');
+                return;
+            }
+
+            header.classList.toggle('active');
+            list.classList.toggle('active');
+
+            // Dropdown açıkken z-index'i artır
+            if (list.classList.contains('active')) {
+                dropdown.style.zIndex = '20000';
+                list.style.zIndex = '20001';
+                controlPanel.style.zIndex = '19999';
+                controlPanel.style.overflow = 'visible';
+            } else {
+                // Reset search when closing
+                document.querySelector('.dropdown-search-input').value = '';
+                renderGroups(allGroups);
+                // Z-index'leri normale döndür
+                setTimeout(() => {
+                    dropdown.style.zIndex = '';
+                    list.style.zIndex = '';
+                    controlPanel.style.zIndex = '';
+                }, 300);
+            }
+        }
+
+        function selectGroup(group) {
+            selectedGroup = group;
+            document.getElementById('groupSelect').value = group.id;
+            document.getElementById('selectedText').textContent = group.title;
+
+            // Update all dropdown items
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Close dropdown
+            toggleDropdown();
+        }
+
+        function filterGroups(searchTerm) {
+            const filtered = allGroups.filter(group =>
+                group.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            renderGroups(filtered);
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('customDropdown');
+            if (!dropdown.contains(event.target)) {
+                const header = document.querySelector('.dropdown-header');
+                const list = document.getElementById('dropdownList');
+                header.classList.remove('active');
+                list.classList.remove('active');
+            }
+        });
+
+
+
+
+        function showError(message) {
+            const alert = document.getElementById('errorAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const alert = document.getElementById('successAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        function hideAlerts() {
+            document.getElementById('errorAlert').style.display = 'none';
+            document.getElementById('successAlert').style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            // Remove existing toast
+            removeToast();
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = 'loadingToast';
+
+            const iconClass = type === 'warning' ? 'fa-solid fa-circle-exclamation' :
+                type === 'success' ? 'fa-solid fa-check-circle' :
+                    'fa-solid fa-circle-info';
+            toast.innerHTML = `
+                <i class="${iconClass}"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Success ve info mesajları için otomatik kapat
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    removeToast();
+                }, 3000); // 3 saniye sonra kapat
+            } else if (type === 'warning') {
+                // Warning mesajları daha uzun kalsın
+                setTimeout(() => {
+                    removeToast();
+                }, 5000); // 5 saniye sonra kapat
+            }
+        }
+
+        function removeToast() {
+            const toast = document.getElementById('loadingToast');
+            if (toast) {
+                // Fade out animasyonu
+                toast.style.transition = 'opacity 0.5s, transform 0.5s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }
+        }
+
+        async function analyzeWeeklyParticipation(event) {
+            console.log("🚀 Haftalık analiz başlatılıyor...");
+
+            const groupId = document.getElementById('groupSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            console.log(`Log: GroupID=${groupId}, Date=${startDate}-${endDate}`);
+
+            if (!groupId) {
+                showError('Lütfen bir grup seçin');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                showError('Lütfen bir tarih aralığı seçin');
+                return;
+            }
+
+            // Butonu bul ve devre dışı bırak
+            let weeklyBtn = null;
+            if (event && event.target) {
+                weeklyBtn = event.target.closest('button');
+            }
+            if (!weeklyBtn) {
+                weeklyBtn = document.querySelector('button[onclick*="analyzeWeeklyParticipation"]');
+            }
+
+            const originalContent = weeklyBtn ? weeklyBtn.innerHTML : '';
+            if (weeklyBtn) {
+                weeklyBtn.disabled = true;
+                weeklyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...';
+            }
+
+            // Loading göster
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) loadingEl.style.display = 'block';
+
+            const resultsEl = document.getElementById('results');
+            if (resultsEl) resultsEl.style.display = 'none';
+
+            const weeklyEl = document.getElementById('weeklyParticipationSection');
+            if (weeklyEl) weeklyEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/weekly-participation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        thread_id: groupId,
+                        start_date: startDate,
+                        end_date: endDate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data) {
+                    displayWeeklyParticipation(data);
+                    // Results'ı gizle, haftalık katılımı göster
+                    const resultsEl2 = document.getElementById('results');
+                    if (resultsEl2) resultsEl2.style.display = 'none';
+
+                    const weeklyEl2 = document.getElementById('weeklyParticipationSection');
+                    if (weeklyEl2) weeklyEl2.style.display = 'block';
+
+                    // Sayfayı yukarı kaydır
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Sayfayı yukarı kaydır
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showError(data.error || 'Haftalık katılım analizi başarısız');
+                }
+            } catch (error) {
+                showError('Haftalık katılım analizi hatası: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                // Butonu eski haline döndür
+                weeklyBtn.disabled = false;
+                weeklyBtn.innerHTML = originalContent;
+            }
+        }
+
+        function displayWeeklyParticipation(data) {
+            // Özet istatistikler
+            const statsDiv = document.getElementById('weeklyStats');
+            statsDiv.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-value">${data.summary.total_members}</div>
+                        <div class="stat-label"><i class="fa-solid fa-users"></i> Toplam Üye</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                        <div class="stat-value">${data.summary.active_members}</div>
+                        <div class="stat-label"><i class="fa-solid fa-check-circle"></i> Katılım Tamam</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ff9800 0%, #fb8c00 100%);">
+                        <div class="stat-value">${data.summary.warning_members}</div>
+                        <div class="stat-label"><i class="fa-solid fa-exclamation-triangle"></i> Eksik Katılım</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f44336 0%, #e53935 100%);">
+                        <div class="stat-value">${data.summary.inactive_members}</div>
+                        <div class="stat-label"><i class="fa-solid fa-times-circle"></i> Katılım Yok</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <i class="fa-solid fa-info-circle"></i> Gereken Minimum Katılım: <strong>${data.weekly_requirement} gün</strong>
+                    </p>
+                    <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">
+                        <i class="fa-solid fa-calendar-days"></i> Tarih Aralığı: <strong>${data.week_range.start} - ${data.week_range.end}</strong>
+                    </p>
+                    ${data.actual_range && data.actual_range.start ? `
+                    <p style="color: #ff9800; margin: 0.5rem 0 0 0; font-size: 0.9em;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Bulunan Veri Aralığı: <strong>${data.actual_range.start} - ${data.actual_range.end || data.week_range.end}</strong>
+                    </p>
+                    ` : ''}
+                </div>
+            `;
+
+            // Üye listesi
+            const membersDiv = document.getElementById('membersList');
+            membersDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Grup Üyeleri Katılım Durumu</h3>
+                    <div style="position: relative; width: 300px; max-width: 100%;">
+                        <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
+                        <input type="text"
+                            id="memberFilterInput"
+                            placeholder="Kullanıcı adı ara..."
+                            onkeyup="filterMembers(this.value)"
+                            onfocus="this.style.borderColor='rgba(102, 126, 234, 0.5)'; this.style.background='rgba(255, 255, 255, 0.08)';"
+                            onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.05)';"
+                            style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; transition: all 0.3s ease;"
+                        />
+                    </div>
+                </div>
+                <div id="copyButtonsContainer"></div>
+                <div id="membersListContent"></div>
+            `;
+
+            // Üyeleri duruma göre sırala (inactive -> warning -> active)
+            const sortedMembers = Object.entries(data.members).sort((a, b) => {
+                const statusOrder = { 'inactive': 0, 'warning': 1, 'active': 2 };
+                const statusDiff = statusOrder[a[1].status] - statusOrder[b[1].status];
+                if (statusDiff !== 0) return statusDiff;
+                // Aynı durumdaysa eksik gün sayısına göre sırala
+                return b[1].missing_days - a[1].missing_days;
+            });
+
+            // Üye listesini global değişkende sakla (filtreleme için)
+            window.weeklyMembersData = sortedMembers;
+
+            // İlk render
+            renderMembersList(sortedMembers);
+        }
+
+        function renderMembersList(membersToShow) {
+            const membersContentDiv = document.getElementById('membersListContent');
+            if (!membersContentDiv) return;
+
+            membersContentDiv.innerHTML = '';
+
+            // Kopyalama butonlarını üste render et
+            renderCopyButtons(membersToShow);
+
+            if (membersToShow.length === 0) {
+                membersContentDiv.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <i class="fa-solid fa-search" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>Arama kriterine uygun kullanıcı bulunamadı</p>
+                    </div>
+                `;
+                return;
+            }
+
+            membersToShow.forEach(([userId, member]) => {
+                const statusColor = {
+                    'active': '#4caf50',
+                    'warning': '#ff9800',
+                    'inactive': '#f44336'
+                }[member.status];
+
+                const statusIcon = {
+                    'active': 'fa-check-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'inactive': 'fa-times-circle'
+                }[member.status];
+
+                const statusText = {
+                    'active': 'Katılım Tamam',
+                    'warning': `${member.missing_days} Gün Eksik`,
+                    'inactive': 'Katılım Yok'
+                }[member.status];
+
+                const participationDays = member.participation_days.sort();
+                const participationText = participationDays.length > 0
+                    ? participationDays.map(day => {
+                        const date = new Date(day);
+                        return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+                    }).join(', ')
+                    : 'Hiç katılım yok';
+
+                // Medya türü badge'leri oluştur
+                const typeCounts = member.type_counts || {};
+                const typeIcons = {
+                    'Reels': 'fa-solid fa-clapperboard',
+                    'Gönderi': 'fa-regular fa-image',
+                    'Hikaye': 'fa-regular fa-circle-play',
+                    'Video': 'fa-solid fa-video',
+                    'Foto/Video': 'fa-solid fa-camera',
+                    'Diğer': 'fa-solid fa-file'
+                };
+                const typeBadgesHtml = Object.entries(typeCounts).map(([type, count]) => {
+                    const icon = typeIcons[type] || 'fa-solid fa-file';
+                    return `<span style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.2rem 0.55rem; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); font-size:0.78rem; color:var(--text-secondary);">
+                        <i class="${icon}" style="font-size:0.7rem;"></i> ${type} <strong style="color:var(--text-primary);">${count}</strong>
+                    </span>`;
+                }).join('');
+
+                const memberHtml = `
+                    <div class="user-stat-item" style="border-left: 4px solid ${statusColor}; cursor: pointer;" onclick="toggleMemberDetails('${userId}')">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <div class="user-name">
+                                    <i class="fa-solid ${statusIcon}" style="color: ${statusColor}; margin-right: 0.5rem;"></i>
+                                    ${member.username.startsWith('@') ? member.username : '@' + member.username}
+                                </div>
+                                <div class="user-counts">
+                                    <div class="count-item">
+                                        <span class="count-label">Katılım Günleri:</span>
+                                        <span class="count-value">${member.participation_days.length} gün</span>
+                                    </div>
+                                    <div class="count-item">
+                                        <span class="count-label">Toplam Paylaşım:</span>
+                                        <span class="count-value">${member.total_shares}</span>
+                                    </div>
+                                    <div class="count-item" style="color: ${statusColor}; font-weight: 600;">
+                                        <span>${statusText}</span>
+                                    </div>
+                                </div>
+                                ${typeBadgesHtml ? `
+                                <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.6rem;">
+                                    ${typeBadgesHtml}
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; flex-shrink: 0;">
+                                ${member.missing_days > 0 ? `
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: ${statusColor};">
+                                            ${member.missing_days}
+                                        </div>
+                                        <div style="font-size: 0.9rem; color: var(--text-secondary);">Eksik Gün</div>
+                                    </div>
+                                ` : `
+                                    <i class="fa-solid fa-trophy" style="font-size: 2rem; color: #ffc107;"></i>
+                                `}
+
+                            </div>
+                        </div>
+                        <div id="memberDetails_${userId}" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <strong>Katılım Yapılan Günler:</strong>
+                            <p style="margin-top: 0.5rem; color: var(--text-secondary);">${participationText}</p>
+                            ${Object.entries(member.daily_shares).length > 0 ? `
+                                <strong style="margin-top: 1rem; display: block;">Günlük Paylaşım Detayı:</strong>
+                                <div style="margin-top: 0.5rem;">
+                                    ${Object.entries(member.daily_shares).sort().map(([day, count]) => {
+                    const date = new Date(day);
+                    const formattedDate = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const dayTypes = (member.daily_type_details || {})[day] || {};
+                    const dayTypesStr = Object.entries(dayTypes).map(([t, c]) => `${c} ${t}`).join(', ');
+                    return `<div style="padding: 0.3rem 0; color: var(--text-secondary);">\u2022 ${formattedDate}: <strong>${count} payla\u015f\u0131m</strong>${dayTypesStr ? ` <span style="opacity:0.7;">(${dayTypesStr})</span>` : ''}</div>`;
+                }).join('')}
+                                </div>
+                            ` : ''}
+                            ${(member.text_messages && member.text_messages.length > 0) ? `
+                                <div style="margin-top: 1rem;">
+                                    <button onclick="event.stopPropagation(); toggleTextMessages('${userId}')" style="background:var(--gradient-dark-2); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:0.5rem 1rem; color:var(--text-primary); cursor:pointer; font-size:0.85rem; font-family:'Inter',sans-serif; display:inline-flex; align-items:center; gap:0.4rem; transition:all 0.3s ease;">
+                                        <i class="fa-regular fa-comment-dots"></i> Mesajlar\u0131 G\u00f6r (${member.text_messages.length})
+                                    </button>
+                                    <div id="textMessages_${userId}" style="display:none; margin-top:0.8rem; max-height:300px; overflow-y:auto; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                                        ${member.text_messages.map(m => 
+                                            `<div style="padding:0.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; gap:0.6rem; align-items:flex-start;">
+                                                <span style="color:rgba(102,126,234,0.7); font-size:0.75rem; white-space:nowrap; min-width:70px;">${m.time}</span>
+                                                <span style="color:var(--text-secondary); font-size:0.85rem; word-break:break-word;">${m.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                            </div>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                membersContentDiv.innerHTML += memberHtml;
+            });
+
+        }
+
+        function renderCopyButtons(membersToShow) {
+            const container = document.getElementById('copyButtonsContainer');
+            if (!container) return;
+
+            const inactiveCount = membersToShow.filter(([id, member]) => member.status === 'inactive').length;
+
+            if (inactiveCount > 0) {
+                container.innerHTML = `
+                 <div style="margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center;">
+                    <button class="btn btn-copy" onclick="copyInactiveUsernames()" style="background: var(--gradient-dark-2); border: 1px solid rgba(255,255,255,0.12); padding: 0.7rem 1.2rem; font-size: 0.85rem;">
+                        <i class="fa-regular fa-clipboard"></i> Eksikleri Kopyala (${inactiveCount} Kişi)
+                    </button>
+                    <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                        <i class="fa-solid fa-info-circle"></i> Hiç katılım yapmayanların @kullaniciadi listesi kopyalanır
+                    </span>
+                 </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function toggleMemberDetails(userId) {
+            const detailsDiv = document.getElementById(`memberDetails_${userId}`);
+            if (detailsDiv) {
+                detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function toggleTextMessages(userId) {
+            const div = document.getElementById(`textMessages_${userId}`);
+            if (div) {
+                div.style.display = div.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function filterMembers(searchTerm) {
+            if (!window.weeklyMembersData) return;
+
+            const searchLower = searchTerm.toLowerCase().replace('@', '');
+
+            if (searchLower === '') {
+                // Boşsa tüm listeyi göster
+                renderMembersList(window.weeklyMembersData);
+                return;
+            }
+
+            // Kullanıcı adına göre filtrele
+            const filtered = window.weeklyMembersData.filter(([userId, member]) => {
+                const username = member.username.toLowerCase().replace('@', '');
+                const fullName = (member.full_name || '').toLowerCase();
+                return username.includes(searchLower) || fullName.includes(searchLower);
+            });
+
+            renderMembersList(filtered);
+
+            // Sonuç sayısını göster
+            const resultCountText = filtered.length > 0
+                ? `${filtered.length} kullanıcı bulundu`
+                : 'Kullanıcı bulunamadı';
+
+            // Küçük bir bilgi mesajı göster
+            const filterInput = document.getElementById('memberFilterInput');
+            if (filterInput && searchLower !== '') {
+                filterInput.style.borderColor = filtered.length > 0
+                    ? 'rgba(76, 175, 80, 0.5)'
+                    : 'rgba(244, 67, 54, 0.5)';
+            }
+        }
+
+        async function removeUserFromGroup(userId, username) {
+            const groupId = document.getElementById('groupSelect').value;
+
+            // Butonu bul
+            const button = event.target.closest('button') || event.target;
+
+            // Kullanıcıdan onay al
+            const confirmMessage = `@${username.replace('@', '')} kullanıcısını gruptan çıkarmak istediğinize emin misiniz?\n\nBu işlem geri alınamaz!`;
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            // Butonu devre dışı bırak ve yükleniyor göster
+            button.disabled = true;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...';
+
+            try {
+                const response = await fetch('/api/remove-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        thread_id: groupId,
+                        user_id: userId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Başarılı mesajı göster
+                    showSuccess(`@${username.replace('@', '')} gruptan başarıyla çıkarıldı`);
+
+                    // Toast bildirim ekle
+                    showToast(`✓ @${username.replace('@', '')} gruptan çıkarıldı`, 'success');
+
+                    // Kullanıcıyı listeden kaldır
+                    const memberElement = button.closest('.user-stat-item');
+                    if (memberElement) {
+                        memberElement.style.transition = 'opacity 0.5s, transform 0.5s';
+                        memberElement.style.opacity = '0';
+                        memberElement.style.transform = 'translateX(-100%)';
+                        setTimeout(() => {
+                            memberElement.remove();
+
+                            // Hiç üye kalmadıysa bilgi göster
+                            const remainingMembers = document.querySelectorAll('#membersListContent .user-stat-item');
+                            if (remainingMembers.length === 0) {
+                                document.getElementById('membersListContent').innerHTML = `
+                                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                        <i class="fa-solid fa-check-circle" style="font-size: 2rem; margin-bottom: 1rem; color: #4caf50;"></i>
+                                        <p>Tüm inaktif üyeler gruptan çıkarıldı</p>
+                                    </div>
+                                `;
+                            }
+                        }, 500);
+                    }
+
+                    // Listeyi güncelle (global veriyi de güncelle)
+                    window.weeklyMembersData = window.weeklyMembersData.filter(([id, member]) => id !== userId);
+
+                    // Özet istatistikleri güncelle
+                    updateWeeklyStatsSummary();
+
+                } else {
+                    showError(`Hata: ${data.message || 'Kullanıcı gruptan çıkarılamadı'}`);
+                    // Butonu eski haline döndür
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+
+            } catch (error) {
+                showError('Bağlantı hatası: ' + error.message);
+                // Butonu eski haline döndür
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function updateWeeklyStatsSummary() {
+            // Mevcut üyeleri say
+            if (!window.weeklyMembersData) return;
+
+            let activeCount = 0;
+            let warningCount = 0;
+            let inactiveCount = 0;
+
+            window.weeklyMembersData.forEach(([id, member]) => {
+                if (member.status === 'active') activeCount++;
+                else if (member.status === 'warning') warningCount++;
+                else if (member.status === 'inactive') inactiveCount++;
+            });
+
+            // Özet kartları güncelle
+            const statsGrid = document.querySelector('#weeklyStats .stats-grid');
+            if (statsGrid) {
+                const cards = statsGrid.querySelectorAll('.stat-card');
+                if (cards.length >= 4) {
+                    cards[0].querySelector('.stat-value').textContent = window.weeklyMembersData.length;
+                    cards[1].querySelector('.stat-value').textContent = activeCount;
+                    cards[2].querySelector('.stat-value').textContent = warningCount;
+                    cards[3].querySelector('.stat-value').textContent = inactiveCount;
+                }
+            }
+        }
+
+        function copyInactiveUsernames() {
+            if (!window.weeklyMembersData) {
+                showError('Kopyalanacak veri bulunamadı');
+                return;
+            }
+
+            const targetUsers = window.weeklyMembersData
+                .filter(([id, member]) => member.status === 'inactive')
+                .map(([id, member]) => member.username.startsWith('@') ? member.username : '@' + member.username);
+
+            if (targetUsers.length === 0) {
+                showError('Hiç katılım yapmamış kullanıcı bulunamadı');
+                return;
+            }
+
+            const usernamesList = targetUsers.sort().join('\n');
+
+            navigator.clipboard.writeText(usernamesList).then(() => {
+                showSuccess(`${targetUsers.length} kişi kopyalandı (hiç katılım yapmayanlar)`);
+                showToast(`${targetUsers.length} kullanıcı adı kopyalandı`, 'success');
+            }).catch(err => {
+                const textArea = document.createElement('textarea');
+                textArea.value = usernamesList;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    document.execCommand('copy');
+                    showSuccess(`${targetUsers.length} kişi kopyalandı (hiç katılım yapmayanlar)`);
+                } catch (err) {
+                    showError('Kopyalama başarısız: ' + err);
+                }
+
+                document.body.removeChild(textArea);
+            });
+        }
+
+        // Scroll to Top functionality
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide scroll to top button based on scroll position
+        window.addEventListener('scroll', () => {
+            const scrollButton = document.getElementById('scrollToTop');
+            if (window.scrollY > 200) {
+                scrollButton.classList.add('active');
+            } else {
+                scrollButton.classList.remove('active');
+            }
+        });
+
+        // Add keyboard shortcut for scroll to top (Home key)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Home') {
+                e.preventDefault();
+                scrollToTop();
+            }
+        });
+    </script>
+    <!-- Scroll to Top Button -->
+    <div class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()">
+        <i class="fa-solid fa-chevron-up"></i>
+    </div>
+
+</body>
+
+</html>

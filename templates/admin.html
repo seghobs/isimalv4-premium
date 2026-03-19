@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Yönetim Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(25, 25, 45, 0.8);
+            --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            --gradient-success: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            --gradient-danger: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8b3;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(245, 87, 108, 0.15) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        /* Login Form */
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .form-group input[type="password"],
+        .form-group input[type="text"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input[type="password"]:focus,
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .form-group .input-hint {
+            display: block;
+            color: rgba(168, 168, 179, 0.6);
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+
+        /* Main Panel */
+        .admin-panel {
+            display: none;
+        }
+
+        .token-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            margin-bottom: 2rem;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .form-header h2 {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .current-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+        }
+
+        .input-with-toggle {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-with-toggle input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 3.5rem 1rem 1rem;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-with-toggle input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #b8c7ff;
+        }
+
+        .btn {
+            background: var(--gradient-dark);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .help-text {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .help-text h3 {
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .help-text p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-text code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #a7d6ff;
+        }
+
+        .help-text ol {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.success {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+        }
+
+        .alert.error {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--gradient-danger);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.3);
+        }
+
+        .token-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .token-status.active {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+        }
+
+        .token-status.inactive {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+        }
+
+        .token-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease infinite;
+        }
+
+        .token-status.active .dot {
+            background: #43e97b;
+        }
+
+        .token-status.inactive .dot {
+            background: #f5576c;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Field separator */
+        .field-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 1.5rem 0;
+        }
+
+        /* Field icon badges */
+        .form-group label .field-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.15);
+            color: #667eea;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+
+        .form-group label .field-badge.required {
+            background: rgba(245, 87, 108, 0.15);
+            color: #f5576c;
+        }
+
+        .form-group label .field-badge.optional {
+            background: rgba(255, 186, 73, 0.15);
+            color: #ffba49;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .header {
+                margin-bottom: 1.5rem;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+
+            .token-form {
+                padding: 1.2rem;
+                border-radius: 15px;
+                margin-top: 3rem;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .current-user {
+                justify-content: center;
+            }
+
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+
+            .logout-btn {
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .help-text {
+                padding: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logout-btn span {
+                display: none;
+            }
+        }
+
+        /* Accounts List */
+        .account-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .account-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .account-card.active {
+            border-color: rgba(67, 233, 123, 0.5);
+            background: rgba(67, 233, 123, 0.05);
+        }
+
+        .account-card.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #43e97b;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .account-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        .account-card.active .account-avatar {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.3) 0%, rgba(56, 249, 215, 0.3) 100%);
+        }
+
+        .account-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .account-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .account-username {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .account-badges {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .account-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .account-badge.has {
+            background: rgba(67, 233, 123, 0.1);
+            color: #43e97b;
+        }
+
+        .account-badge.missing {
+            background: rgba(245, 87, 108, 0.1);
+            color: #f5576c;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .account-btn {
+            padding: 0.4rem 0.7rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+
+        .account-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #b8c7ff;
+        }
+
+        .account-btn.activate:hover {
+            background: rgba(67, 233, 123, 0.2);
+            border-color: rgba(67, 233, 123, 0.4);
+            color: #43e97b;
+        }
+
+        .account-btn.delete:hover {
+            background: rgba(245, 87, 108, 0.2);
+            border-color: rgba(245, 87, 108, 0.4);
+            color: #f5576c;
+        }
+
+        .account-btn.verify-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+            color: #667eea;
+        }
+
+        .account-btn.verify-btn:hover {
+            background: rgba(102, 126, 234, 0.25);
+            box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .account-btn.verify-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .verify-result {
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            margin-top: 0.8rem;
+            animation: fadeIn 0.4s ease;
+            font-size: 0.85rem;
+        }
+
+        .verify-result.show {
+            display: flex !important;
+        }
+
+        .verify-result.valid {
+            background: rgba(67, 233, 123, 0.08);
+            border: 1px solid rgba(67, 233, 123, 0.25);
+        }
+
+        .verify-result.expired {
+            background: rgba(245, 87, 108, 0.08);
+            border: 1px solid rgba(245, 87, 108, 0.25);
+        }
+
+        .verify-result.warning {
+            background: rgba(255, 186, 73, 0.08);
+            border: 1px solid rgba(255, 186, 73, 0.25);
+        }
+
+        .verify-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .verify-result.valid .verify-icon { color: #43e97b; }
+        .verify-result.expired .verify-icon { color: #f5576c; }
+        .verify-result.warning .verify-icon { color: #ffba49; }
+
+        .verify-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .verify-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .verify-result.valid .verify-status { color: #43e97b; }
+        .verify-result.expired .verify-status { color: #f5576c; }
+        .verify-result.warning .verify-status { color: #ffba49; }
+
+        .verify-detail {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            margin-top: 0.15rem;
+        }
+
+        .account-btn.active-account {
+            background: rgba(67, 233, 123, 0.15);
+            border-color: rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+            cursor: default;
+        }
+
+        @media (max-width: 600px) {
+            .account-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .account-actions {
+                justify-content: flex-end;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-key"></i> Bearer Token Yönetimi</h1>
+            <p>Instagram Mobile API kimlik bilgilerinizi güvenli bir şekilde yönetin</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-card" id="loginForm">
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fa-solid fa-lock"></i> Yönetici Şifresi
+                    </label>
+                    <input type="password" id="password" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </form>
+            <div class="alert error" id="loginError" style="margin-top:1rem;"></div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <button class="btn btn-danger logout-btn" onclick="logout()">
+                <i class="fa-solid fa-sign-out-alt"></i> <span>Çıkış Yap</span>
+            </button>
+
+            <!-- Database Stats Card -->
+            <div class="token-form" style="margin-bottom: 2rem;">
+                <div class="form-header">
+                    <h2><i class="fa-solid fa-database"></i> Veritabanı İstatistikleri</h2>
+                    <button class="btn btn-primary" onclick="loadDatabaseStats()"
+                        style="padding: 0.6rem 1.2rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-sync"></i> Güncelle
+                    </button>
+                </div>
+                <div id="databaseStats"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                </div>
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <button class="btn btn-danger" onclick="clearDatabase()">
+                        <i class="fa-solid fa-trash"></i> Veritabanını Temizle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Accounts List Card -->
+            <div class="token-form" style="margin-bottom: 2rem;">
+                <div class="form-header">
+                    <h2><i class="fa-solid fa-users"></i> Kayitli Hesaplar</h2>
+                    <div style="display: flex; gap: 0.8rem; align-items: center;">
+                        <a href="/login" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; color: white; font-size: 0.85rem; text-decoration: none; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-weight: 500;">
+                            <i class="fa-solid fa-sign-in-alt"></i> Login ile Ekle
+                        </a>
+                        <button onclick="verifyAllAccounts()" id="verifyAllBtn" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: rgba(255, 186, 73, 0.15); border: 1px solid rgba(255, 186, 73, 0.3); border-radius: 10px; color: #ffba49; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-weight: 500;">
+                            <i class="fa-solid fa-shield-check"></i> Hepsini Dogrula
+                        </button>
+                        <span class="current-user" id="accountCount">
+                            <i class="fa-solid fa-database"></i>
+                            <span>Toplam: <strong id="totalAccounts">0</strong> hesap</span>
+                        </span>
+                    </div>
+                </div>
+                <div id="accountsList" style="margin-top: 1rem;">
+                    <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Henüz hesap eklenmemiş.</p>
+                </div>
+            </div>
+
+            <!-- Token Management Card -->
+            <div class="token-form">
+                <div class="form-header">
+                    <h2><i class="fa-solid fa-shield-halved"></i> <span id="formTitle">Yeni Hesap Ekle</span></h2>
+                    <div class="current-user" id="currentUser">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Aktif: <strong id="currentUsername">-</strong></span>
+                    </div>
+                </div>
+
+                <!-- Token Status -->
+                <div class="token-status inactive" id="tokenStatus">
+                    <div class="dot"></div>
+                    <span id="tokenStatusText">Token yüklenmedi</span>
+                </div>
+
+                <div class="help-text">
+                    <h3><i class="fa-solid fa-info-circle"></i> Bu Bilgiler Nasıl Alınır?</h3>
+                    <p>Instagram mobil uygulamasından Bearer Token ve cihaz bilgilerini almak için:</p>
+                    <ol>
+                        <li>HTTP Canary, mitmproxy veya Reqable gibi bir proxy aracı kurun</li>
+                        <li>Instagram uygulamasında herhangi bir işlem yapın</li>
+                        <li>İstek başlıklarında <code>Authorization: Bearer IGT:2:...</code> değerini bulun</li>
+                        <li><code>X-IG-Android-ID</code> ve <code>User-Agent</code> değerlerini de kopyalayın</li>
+                    </ol>
+                    <p style="margin-top: 0.5rem;"><strong>Not:</strong> Token'ı <code>Bearer IGT:2:TOKEN</code>,
+                        <code>IGT:2:TOKEN</code> veya sadece <code>TOKEN</code> formatında yapıştırabilirsiniz.
+                    </p>
+                </div>
+
+                <div class="alert success" id="successAlert"></div>
+                <div class="alert error" id="errorAlert"></div>
+
+                <form onsubmit="saveToken(event)">
+                    <input type="hidden" id="editingAccountId" value="">
+                    
+                    <!-- 0. Account Label Field -->
+                    <div class="form-group">
+                        <label for="accountLabelInput">
+                            <i class="fa-solid fa-tag"></i> Hesap Etiketi
+                            <span class="field-badge optional">Opsiyonel</span>
+                        </label>
+                        <input type="text" id="accountLabelInput" placeholder="Örn: Ana Hesap, İş Hesabı, Kişisel..."
+                            style="font-size: 1rem;">
+                        <span class="input-hint">Hesapları ayırt etmek için kullanılır</span>
+                    </div>
+
+                    <hr class="field-divider">
+
+                    <!-- 1. Token Field -->
+                    <div class="form-group">
+                        <label for="tokenInput">
+                            <i class="fa-solid fa-key"></i> Token (Bearer Token)
+                            <span class="field-badge required">Zorunlu</span>
+                        </label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="tokenInput"
+                                placeholder="Bearer token değerini buraya yapıştırın..." required>
+                            <button type="button" class="toggle-btn"
+                                onclick="toggleVisibility('tokenInput', 'tokenToggleIcon')">
+                                <i class="fa-solid fa-eye" id="tokenToggleIcon"></i>
+                            </button>
+                        </div>
+                        <span class="input-hint">Instagram istek başlığındaki Authorization değeri</span>
+                    </div>
+
+                    <hr class="field-divider">
+
+                    <!-- 1b. Password Field -->
+                    <div class="form-group">
+                        <label for="passwordInput">
+                            <i class="fa-solid fa-lock"></i> Hesap Şifresi
+                            <span class="field-badge optional">Opsiyonel</span>
+                        </label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="passwordInput" placeholder="Instagram hesap şifresi...">
+                            <button type="button" class="toggle-btn"
+                                onclick="toggleVisibility('passwordInput', 'passwordToggleIcon')">
+                                <i class="fa-solid fa-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                        <span class="input-hint">Yenileme gerektiğinde kullanılabilir (güvenli saklanır)</span>
+                    </div>
+
+                    <hr class="field-divider">
+
+                    <!-- 2. Device ID Field -->
+                    <div class="form-group">
+                        <label for="deviceIdInput">
+                            <i class="fa-solid fa-fingerprint"></i> Device ID (X-IG-Device-ID)
+                            <span class="field-badge required">Önemli</span>
+                        </label>
+                        <input type="text" id="deviceIdInput" placeholder="Örn: 12345678-1234-1234-1234-123456789012"
+                            style="font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                        <span class="input-hint">Her hesap için FARKLI olmalı! Proxy aracından kopyalayın</span>
+                    </div>
+
+                    <hr class="field-divider">
+
+                    <!-- 2. Android ID Field -->
+                    <div class="form-group">
+                        <label for="androidIdInput">
+                            <i class="fa-brands fa-android"></i> Android ID
+                            <span class="field-badge optional">Opsiyonel</span>
+                        </label>
+                        <div class="input-with-toggle">
+                            <input type="text" id="androidIdInput" placeholder="Örn: android-abc123def456...">
+                            <button type="button" class="toggle-btn"
+                                onclick="toggleVisibility('androidIdInput', 'androidToggleIcon')">
+                                <i class="fa-solid fa-eye" id="androidToggleIcon"></i>
+                            </button>
+                        </div>
+                        <span class="input-hint">İstek başlığındaki X-IG-Android-ID değeri (cihaz kimliği)</span>
+                    </div>
+
+                    <hr class="field-divider">
+
+                    <!-- 3. User Agent Field -->
+                    <div class="form-group">
+                        <label for="userAgentInput">
+                            <i class="fa-solid fa-mobile-screen"></i> User Agent
+                            <span class="field-badge optional">Opsiyonel</span>
+                        </label>
+                        <input type="text" id="userAgentInput"
+                            placeholder="Örn: Instagram 317.0.0.34.109 Android (30/11; ...)"
+                            style="font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                        <span class="input-hint">Bos birakilirsa varsayilan Samsung Galaxy S21 User-Agent
+                            kullanilir</span>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-save"></i> <span id="saveBtnText">Yeni Hesap Ekle</span>
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="loadCurrentToken()">
+                            <i class="fa-solid fa-refresh"></i> Yenile
+                        </button>
+                        <button type="button" class="btn" onclick="clearInputs()">
+                            <i class="fa-solid fa-eraser"></i> Temizle
+                        </button>
+                        <button type="button" class="btn" id="cancelEditBtn" onclick="cancelEdit()" style="display:none; background: linear-gradient(135deg, #555 0%, #666 100%);">
+                            <i class="fa-solid fa-times"></i> İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        checkAuth();
+
+        function checkAuth() {
+            fetch('/api/admin/check-auth')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.authenticated) {
+                        showAdminPanel();
+                        loadCurrentToken();
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAdminPanel();
+                        loadCurrentToken();
+                    } else {
+                        showLoginError(data.error || 'Yanlış şifre!');
+                    }
+                })
+                .catch(err => {
+                    showLoginError('Giriş hatası: ' + err.message);
+                });
+        }
+
+        function logout() {
+            fetch('/api/admin/logout', { method: 'POST' })
+                .then(() => {
+                    document.getElementById('adminPanel').style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'block';
+                    document.getElementById('password').value = '';
+                })
+                .catch(err => console.error(err));
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        function showLoginError(message) {
+            const alert = document.getElementById('loginError');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+
+        function showSuccess(message) {
+            const alert = document.getElementById('successAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 4000);
+        }
+
+        function showError(message) {
+            const alert = document.getElementById('errorAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        function toggleVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function updateTokenStatus(hasToken, username) {
+            const status = document.getElementById('tokenStatus');
+            const text = document.getElementById('tokenStatusText');
+
+            if (hasToken) {
+                status.className = 'token-status active';
+                text.textContent = `Token aktif${username ? ' — @' + username : ''}`;
+            } else {
+                status.className = 'token-status inactive';
+                text.textContent = 'Token yüklenmedi';
+            }
+        }
+
+        function loadCurrentToken() {
+            fetch('/api/admin/get-token')
+                .then(res => res.json())
+                .then(data => {
+                    // Hesap listesini göster
+                    if (data.accounts) {
+                        renderAccountsList(data.accounts);
+                        document.getElementById('totalAccounts').textContent = data.total_accounts;
+                    }
+
+                    if (data.token && data.token.token) {
+                        document.getElementById('tokenInput').value = data.token.token;
+                        document.getElementById('androidIdInput').value = data.token.android_id || '';
+                        document.getElementById('deviceIdInput').value = data.token.device_id || '';
+                        document.getElementById('userAgentInput').value = data.token.user_agent || '';
+                        document.getElementById('accountLabelInput').value = data.token.account_label || '';
+                        document.getElementById('passwordInput').value = data.token.password || '';
+                        updateTokenStatus(true, data.username);
+
+                        if (data.username) {
+                            document.getElementById('currentUsername').textContent = data.username;
+                        }
+                    } else {
+                        updateTokenStatus(false);
+                    }
+                })
+                .catch(err => {
+                    showError('Bilgi yükleme hatası: ' + err.message);
+                });
+        }
+
+        function renderAccountsList(accounts) {
+            const container = document.getElementById('accountsList');
+            
+            if (!accounts || accounts.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Henüz hesap eklenmemiş. Aşağıdan yeni hesap ekleyin.</p>';
+                return;
+            }
+
+            let html = '';
+            accounts.forEach(acc => {
+                const isActive = acc.is_active;
+                const label = acc.account_label || acc.username || `Hesap #${acc.id}`;
+                const statusClass = isActive ? 'active' : '';
+                
+                html += `
+                    <div class="account-card ${statusClass}" id="accountCard_${acc.id}" style="position: relative;">
+                        <div class="account-info">
+                            <div class="account-avatar">
+                                <i class="fa-solid ${isActive ? 'fa-check-circle' : 'fa-user'}"></i>
+                            </div>
+                            <div class="account-details">
+                                <div class="account-label">${escapeHtml(label)}</div>
+                                <div class="account-username">@${escapeHtml(acc.username || 'Bilinmeyen')} ${isActive ? '<span style="color: #43e97b;">(Aktif)</span>' : ''}</div>
+                                <div class="account-badges">
+                                    <span class="account-badge ${acc.has_device_id ? 'has' : 'missing'}">
+                                        <i class="fa-solid fa-fingerprint"></i> Device
+                                    </span>
+                                    <span class="account-badge ${acc.has_android_id ? 'has' : 'missing'}">
+                                        <i class="fa-brands fa-android"></i> Android
+                                    </span>
+                                    <span class="account-badge ${acc.has_user_agent ? 'has' : 'missing'}">
+                                        <i class="fa-solid fa-mobile-screen"></i> UA
+                                    </span>
+                                    <span class="account-badge verify-badge" id="verifyBadge_${acc.id}" style="display:none;"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="account-actions">
+                            <button class="account-btn verify-btn" id="verifyBtn_${acc.id}" onclick="verifyAccount(${acc.id}, '${escapeHtml(label)}')" title="Token dogrula">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </button>
+                            ${isActive 
+                                ? '<button class="account-btn active-account"><i class="fa-solid fa-check"></i> Aktif</button>'
+                                : `<button class="account-btn activate" onclick="activateAccount(${acc.id})"><i class="fa-solid fa-play"></i> Aktif Et</button>`
+                            }
+                            <button class="account-btn" onclick="editAccount(${acc.id})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="account-btn delete" onclick="deleteAccount(${acc.id}, '${escapeHtml(label)}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="verify-result" id="verifyResult_${acc.id}"></div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function verifyAllAccounts() {
+            const btn = document.getElementById('verifyAllBtn');
+            const allBtns = document.querySelectorAll('[id^="verifyBtn_"]');
+            
+            if (allBtns.length === 0) {
+                showSuccess('Dogrulanacak hesap yok.');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dogrulaniyor...';
+            
+            // Her butonu sirayla tetikle (ayni anda 2'ye kadar)
+            const accountIds = [];
+            allBtns.forEach(b => {
+                const id = parseInt(b.id.replace('verifyBtn_', ''));
+                if (id) accountIds.push(id);
+            });
+            
+            let completed = 0;
+            const total = accountIds.length;
+            
+            // Paralel olarak 2'li gruplar halinde dogrula
+            async function verifyInBatches(ids, concurrency = 2) {
+                for (let i = 0; i < ids.length; i += concurrency) {
+                    const batch = ids.slice(i, i + concurrency);
+                    await Promise.all(batch.map(id => {
+                        const label = document.querySelector(`#accountCard_${id} .account-label`)?.textContent || `#${id}`;
+                        return new Promise(resolve => {
+                            // verifyAccount zaten fetch yapiyor, onu cagiralim
+                            const verifyBtn = document.getElementById(`verifyBtn_${id}`);
+                            if (verifyBtn) {
+                                verifyBtn.click();
+                                // Her birinin bitmesini bekle
+                                const checkInterval = setInterval(() => {
+                                    if (!verifyBtn.disabled) {
+                                        clearInterval(checkInterval);
+                                        completed++;
+                                        resolve();
+                                    }
+                                }, 500);
+                                // 20 saniye timeout
+                                setTimeout(() => { clearInterval(checkInterval); completed++; resolve(); }, 20000);
+                            } else {
+                                completed++;
+                                resolve();
+                            }
+                        });
+                    }));
+                }
+            }
+            
+            verifyInBatches(accountIds).then(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Hepsini Dogrula';
+                showSuccess(`${total} hesap dogrulandi!`);
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Hepsini Dogrula';
+            });
+        }
+
+        function verifyAccount(accountId, label) {
+            const btn = document.getElementById(`verifyBtn_${accountId}`);
+            const resultEl = document.getElementById(`verifyResult_${accountId}`);
+            const badgeEl = document.getElementById(`verifyBadge_${accountId}`);
+            const cardEl = document.getElementById(`accountCard_${accountId}`);
+            
+            // Loading durumu
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            resultEl.innerHTML = '';
+            resultEl.className = 'verify-result';
+            resultEl.style.display = 'none';
+            badgeEl.style.display = 'none';
+            
+            fetch('/api/admin/verify-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account_id: accountId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                    
+                    if (data.valid === true) {
+                        // Token aktif
+                        cardEl.style.borderColor = 'rgba(67, 233, 123, 0.5)';
+                        
+                        const followers = typeof data.follower_count === 'number' ? data.follower_count.toLocaleString('tr-TR') : '?';
+                        const following = typeof data.following_count === 'number' ? data.following_count.toLocaleString('tr-TR') : '?';
+                        const media = typeof data.media_count === 'number' ? data.media_count.toLocaleString('tr-TR') : null;
+                        
+                        let detailParts = [];
+                        detailParts.push(`<strong>@${data.username}</strong>`);
+                        if (data.full_name) detailParts.push(`(${data.full_name})`);
+                        detailParts.push(`${followers} takipci`);
+                        detailParts.push(`${following} takip`);
+                        if (media) detailParts.push(`${media} gonderi`);
+                        if (data.is_private) detailParts.push('<i class="fa-solid fa-lock" style="font-size:0.7rem;"></i> Gizli');
+                        
+                        resultEl.className = 'verify-result show valid';
+                        resultEl.innerHTML = `
+                            <div class="verify-icon"><i class="fa-solid fa-check-circle"></i></div>
+                            <div class="verify-info">
+                                <div class="verify-status">Token Aktif</div>
+                                <div class="verify-detail">${detailParts.join(' &middot; ')}</div>
+                            </div>
+                        `;
+                        resultEl.style.display = 'flex';
+                        
+                        // Badge guncelle
+                        badgeEl.style.display = 'inline-block';
+                        badgeEl.className = 'account-badge has';
+                        badgeEl.innerHTML = '<i class="fa-solid fa-check"></i> Aktif';
+                        
+                        // Kullanici adini guncelle
+                        const usernameEl = cardEl.querySelector('.account-username');
+                        if (usernameEl && data.username) {
+                            const isActiveText = usernameEl.innerHTML.includes('(Aktif)');
+                            usernameEl.innerHTML = `@${data.username}${isActiveText ? ' <span style="color: #43e97b;">(Aktif)</span>' : ''}`;
+                        }
+                        
+                    } else if (data.valid === false) {
+                        // Token expired
+                        cardEl.style.borderColor = 'rgba(245, 87, 108, 0.5)';
+                        resultEl.className = 'verify-result show expired';
+                        resultEl.innerHTML = `
+                            <div class="verify-icon"><i class="fa-solid fa-times-circle"></i></div>
+                            <div class="verify-info">
+                                <div class="verify-status">Token Expired</div>
+                                <div class="verify-detail">${data.message || 'Token gecersiz veya suresi dolmus'}</div>
+                            </div>
+                        `;
+                        resultEl.style.display = 'flex';
+                        
+                        // Badge guncelle
+                        badgeEl.style.display = 'inline-block';
+                        badgeEl.className = 'account-badge missing';
+                        badgeEl.innerHTML = '<i class="fa-solid fa-xmark"></i> Expired';
+                        
+                    } else {
+                        // Bilinmeyen durum (rate limit, baglanti hatasi)
+                        cardEl.style.borderColor = 'rgba(255, 186, 73, 0.5)';
+                        resultEl.className = 'verify-result show warning';
+                        resultEl.innerHTML = `
+                            <div class="verify-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+                            <div class="verify-info">
+                                <div class="verify-status">Dogrulanamadi</div>
+                                <div class="verify-detail">${data.message || 'Bilinmeyen hata'}</div>
+                            </div>
+                        `;
+                        resultEl.style.display = 'flex';
+                        
+                        badgeEl.style.display = 'inline-block';
+                        badgeEl.className = 'account-badge';
+                        badgeEl.innerHTML = '<i class="fa-solid fa-question"></i> Belirsiz';
+                    }
+                    
+                    // 8 saniye sonra sonucu gizle (badge kalir)
+                    setTimeout(() => {
+                        resultEl.className = 'verify-result';
+                        resultEl.style.display = 'none';
+                        cardEl.style.borderColor = '';
+                    }, 8000);
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                    
+                    cardEl.style.borderColor = 'rgba(255, 186, 73, 0.5)';
+                    resultEl.className = 'verify-result show warning';
+                    resultEl.innerHTML = `
+                        <div class="verify-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+                        <div class="verify-info">
+                            <div class="verify-status">Hata</div>
+                            <div class="verify-detail">${err.message}</div>
+                        </div>
+                    `;
+                    resultEl.style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        resultEl.className = 'verify-result';
+                        resultEl.style.display = 'none';
+                        cardEl.style.borderColor = '';
+                    }, 5000);
+                });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function activateAccount(accountId) {
+            if (!confirm('Bu hesabı aktif etmek istediğinize emin misiniz? Analyzer bu hesapla yeniden başlatılacak.')) return;
+
+            fetch('/api/admin/activate-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account_id: accountId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(`Hesap aktif edildi: @${data.username}`);
+                        loadCurrentToken();
+                    } else {
+                        showError(data.error || 'Aktifleştirme hatası!');
+                    }
+                })
+                .catch(err => showError('Hata: ' + err.message));
+        }
+
+        function editAccount(accountId) {
+            // Bu hesabı form alanlarına yükle
+            fetch('/api/admin/get-token')
+                .then(res => res.json())
+                .then(data => {
+                    const acc = data.accounts.find(a => a.id === accountId);
+                    if (!acc) { showError('Hesap bulunamadı'); return; }
+                    
+                    // Token detayını almak için tüm bilgileri çek
+                    // Mevcut token bilgileri zaten yüklü, sadece ilgili hesabı bul
+                    // Aslında token'ı doğrudan yüklememiz lazım
+                    loadAccountDetails(accountId);
+                });
+        }
+
+        function loadAccountDetails(accountId) {
+            // Hesap detaylarını yükle ve formu doldur
+            fetch('/api/admin/get-token')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.token && data.accounts) {
+                        // Eğer bu hesap aktifse mevcut bilgileri kullan
+                        const acc = data.accounts.find(a => a.id === accountId);
+                        if (!acc) { showError('Hesap bulunamadı'); return; }
+
+                        // Form başlığını güncelle
+                        document.getElementById('formTitle').textContent = `Hesap Düzenle: ${acc.account_label || acc.username}`;
+                        document.getElementById('saveBtnText').textContent = 'Güncelle';
+                        document.getElementById('editingAccountId').value = accountId;
+                        document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+
+                        // Eğer bu hesap aktifse token bilgilerini yükle
+                        if (acc.is_active && data.token) {
+                            document.getElementById('tokenInput').value = data.token.token || '';
+                            document.getElementById('androidIdInput').value = data.token.android_id || '';
+                            document.getElementById('deviceIdInput').value = data.token.device_id || '';
+                            document.getElementById('userAgentInput').value = data.token.user_agent || '';
+                            document.getElementById('accountLabelInput').value = data.token.account_label || '';
+                            document.getElementById('passwordInput').value = data.token.password || '';
+                        } else {
+                            showError('Bu hesabı düzenlemek için önce aktif edin veya API token bilgilerini tekrar girin.');
+                            document.getElementById('accountLabelInput').value = acc.account_label || '';
+                            document.getElementById('editingAccountId').value = accountId;
+                        }
+                    }
+                });
+        }
+
+        function cancelEdit() {
+            document.getElementById('formTitle').textContent = 'Yeni Hesap Ekle';
+            document.getElementById('saveBtnText').textContent = 'Yeni Hesap Ekle';
+            document.getElementById('editingAccountId').value = '';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            clearInputs();
+        }
+
+        function deleteAccount(accountId, label) {
+            if (!confirm(`"${label}" hesabını silmek istediğinize emin misiniz?\nBu işlem geri alınamaz!`)) return;
+
+            fetch('/api/admin/delete-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account_id: accountId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        loadCurrentToken();
+                    } else {
+                        showError(data.error || 'Silme hatası!');
+                    }
+                })
+                .catch(err => showError('Hata: ' + err.message));
+        }
+
+        function clearInputs() {
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('androidIdInput').value = '';
+            document.getElementById('deviceIdInput').value = '';
+            document.getElementById('userAgentInput').value = '';
+            document.getElementById('accountLabelInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function saveToken(event) {
+            event.preventDefault();
+            const token = document.getElementById('tokenInput').value.trim();
+            const androidId = document.getElementById('androidIdInput').value.trim();
+            const deviceId = document.getElementById('deviceIdInput').value.trim();
+            const userAgent = document.getElementById('userAgentInput').value.trim();
+            const accountLabel = document.getElementById('accountLabelInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            const editingId = document.getElementById('editingAccountId').value;
+
+            if (!token) {
+                showError('Lutfen Bearer Token girin!');
+                return;
+            }
+
+            const payload = {
+                token: token,
+                android_id: androidId,
+                device_id: deviceId,
+                user_agent: userAgent,
+                account_label: accountLabel,
+                password: password
+            };
+
+            if (editingId) {
+                payload.account_id = parseInt(editingId);
+            }
+
+            fetch('/api/admin/save-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const msg = editingId ? 'Hesap güncellendi!' : 'Yeni hesap eklendi!';
+                        showSuccess(msg + ` @${data.username}`);
+                        if (data.username) {
+                            document.getElementById('currentUsername').textContent = data.username;
+                            updateTokenStatus(true, data.username);
+                        }
+                        cancelEdit();
+                        loadCurrentToken();
+                    } else {
+                        showError(data.error || 'Kaydetme hatası!');
+                    }
+                })
+                .catch(err => {
+                    showError('Kaydetme hatası: ' + err.message);
+                });
+        }
+
+        function loadDatabaseStats() {
+            fetch('/api/admin/database-stats')
+                .then(res => res.json())
+                .then(data => {
+                    const statsHtml = `
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            <div style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">Hesaplar</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.bearer_tokens || 0}</div>
+                        </div>
+                        <div style="background: rgba(67, 233, 123, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(67, 233, 123, 0.3);">
+                            <div style="color: #43e97b; font-weight: 600; margin-bottom: 0.5rem;">Aktif Hesap</div>
+                            <div style="font-size: 1rem; color: #fff;">${data.active_account || '-'}</div>
+                        </div>
+                        <div style="background: rgba(255, 186, 73, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255, 186, 73, 0.3);">
+                            <div style="color: #ffba49; font-weight: 600; margin-bottom: 0.5rem;">Gruplar</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.groups || 0}</div>
+                        </div>
+                        <div style="background: rgba(245, 87, 108, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(245, 87, 108, 0.3);">
+                            <div style="color: #f5576c; font-weight: 600; margin-bottom: 0.5rem;">Kullanıcılar</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.users || 0}</div>
+                        </div>
+                        <div style="background: rgba(160, 136, 255, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(160, 136, 255, 0.3);">
+                            <div style="color: #a088ff; font-weight: 600; margin-bottom: 0.5rem;">Mesajlar</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.messages || 0}</div>
+                        </div>
+                        <div style="background: rgba(73, 233, 185, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(73, 233, 185, 0.3);">
+                            <div style="color: #49e9b9; font-weight: 600; margin-bottom: 0.5rem;">Medya Paylaşımları</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.media_shares || 0}</div>
+                        </div>
+                        <div style="background: rgba(255, 136, 136, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255, 136, 136, 0.3);">
+                            <div style="color: #ff8888; font-weight: 600; margin-bottom: 0.5rem;">Sistem Logları</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.system_logs || 0}</div>
+                        </div>
+                        <div style="background: rgba(136, 255, 255, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(136, 255, 255, 0.3);">
+                            <div style="color: #88ffff; font-weight: 600; margin-bottom: 0.5rem;">Veritabanı Boyutu</div>
+                            <div style="font-size: 1.5rem; color: #fff;">${data.database_size_mb || 0} MB</div>
+                        </div>
+                    `;
+                    document.getElementById('databaseStats').innerHTML = statsHtml;
+                })
+                .catch(err => {
+                    showError('Veritabanı istatistikleri yüklenemedi: ' + err.message);
+                });
+        }
+
+        function clearDatabase() {
+            const clearAccounts = confirm('Hesapları (Bearer Token) da silmek istiyor musunuz?\n\nOK = Hesaplar dahil HER ŞEY silinsin\nİptal = Sadece analiz verileri silinsin (hesaplar korunur)');
+            
+            if (!confirm('Veritabanı temizlenecek. Emin misiniz?')) {
+                return;
+            }
+
+            fetch('/api/admin/clear-database', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clear_accounts: clearAccounts })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message || 'Veritabanı temizlendi!');
+                        loadDatabaseStats();
+                        if (clearAccounts) {
+                            updateTokenStatus(false);
+                            clearInputs();
+                            cancelEdit();
+                            document.getElementById('currentUsername').textContent = '-';
+                        }
+                        loadCurrentToken();
+                    } else {
+                        showError(data.error || 'Temizleme hatası!');
+                    }
+                })
+                .catch(err => {
+                    showError('Temizleme hatası: ' + err.message);
+                });
+        }
+
+        // Load stats on panel show
+        const originalShowAdminPanel = showAdminPanel;
+        showAdminPanel = function () {
+            originalShowAdminPanel();
+            loadDatabaseStats();
+        }
+    </script>
+</body>
+
+</html>

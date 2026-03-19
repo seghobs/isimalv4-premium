@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Giris</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(25, 25, 45, 0.8);
+            --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            --gradient-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            --gradient-danger: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8b3;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(245, 87, 108, 0.15) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            margin-right: 0.4rem;
+            width: 16px;
+            text-align: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .input-wrapper input::placeholder {
+            color: rgba(168, 168, 179, 0.5);
+        }
+
+        .toggle-visibility {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .toggle-visibility:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #b8c7ff;
+        }
+
+        .input-hint {
+            display: block;
+            color: rgba(168, 168, 179, 0.5);
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--gradient-accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .alert.error {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+        }
+
+        .alert.success {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+        }
+
+        .alert.warning {
+            background: rgba(255, 186, 73, 0.1);
+            border: 1px solid rgba(255, 186, 73, 0.3);
+            color: #ffba49;
+        }
+
+        .alert i {
+            margin-right: 0.5rem;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 1.5rem 0;
+        }
+
+        .section-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-label i {
+            color: #667eea;
+        }
+
+        .optional-fields {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .optional-fields.open {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .toggle-options {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-options:hover {
+            color: #b8c7ff;
+        }
+
+        .toggle-options i {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-options.open i {
+            transform: rotate(180deg);
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #b8c7ff;
+            text-decoration: underline;
+        }
+
+        .links .sep {
+            color: var(--text-secondary);
+            margin: 0 0.5rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        .success-animation {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.2) 0%, rgba(56, 249, 215, 0.2) 100%);
+            border: 2px solid rgba(67, 233, 123, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .success-icon i {
+            font-size: 2rem;
+            color: #43e97b;
+        }
+
+        .success-text {
+            font-size: 1.1rem;
+            color: #43e97b;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-sub {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .success-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .success-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .success-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #b8c7ff;
+        }
+
+        .success-btn.primary {
+            background: var(--gradient-accent);
+            border-color: transparent;
+        }
+
+        .success-btn.primary:hover {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--gradient-accent);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 2000;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .toast.error {
+            background: var(--gradient-danger);
+        }
+
+        .toast.success {
+            background: var(--gradient-success);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+            .toast {
+                right: 1rem;
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-brands fa-instagram"></i> Instagram Giris</h1>
+            <p>Hesabiniza giris yapin, token otomatik olusturulur</p>
+        </div>
+
+        <div class="login-card">
+            <!-- Alert -->
+            <div class="alert" id="alertBox"></div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <form onsubmit="handleLogin(event)">
+                    <!-- Username -->
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fa-solid fa-user"></i> Kullanici Adi
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" placeholder="instagram_kullaniciadi" required autofocus
+                                autocomplete="username">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fa-solid fa-lock"></i> Sifre
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="Sifrenizi girin" required
+                                autocomplete="current-password">
+                            <button type="button" class="toggle-visibility" onclick="togglePass()">
+                                <i class="fa-solid fa-eye" id="passIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Account Label -->
+                    <div class="form-group">
+                        <label for="accountLabel">
+                            <i class="fa-solid fa-tag"></i> Hesap Etiketi
+                            <span style="font-size:0.7rem; opacity:0.6; text-transform:none; letter-spacing:0;">(opsiyonel)</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" id="accountLabel" placeholder="Orn: Ana Hesap, Is Hesabi...">
+                        </div>
+                    </div>
+
+                    <!-- Toggle Advanced -->
+                    <div class="toggle-options" onclick="toggleAdvanced()" id="advancedToggle">
+                        <i class="fa-solid fa-chevron-down"></i>
+                        <span>Device bilgilerini elle gir</span>
+                    </div>
+
+                    <!-- Optional Device Fields -->
+                    <div class="optional-fields" id="optionalFields">
+                        <hr class="divider">
+                        <div class="section-label">
+                            <i class="fa-solid fa-mobile-screen"></i> Cihaz Bilgileri (Opsiyonel)
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deviceId">
+                                <i class="fa-solid fa-fingerprint"></i> Device ID
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="deviceId"
+                                    placeholder="Bos birakilirsa otomatik uretilir"
+                                    style="font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                            </div>
+                            <span class="input-hint">Proxy aracindan alinan X-IG-Device-ID degeri</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="androidId">
+                                <i class="fa-brands fa-android"></i> Android ID
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="androidId"
+                                    placeholder="Bos birakilirsa otomatik uretilir"
+                                    style="font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                            </div>
+                            <span class="input-hint">Proxy aracindan alinan X-IG-Android-ID degeri</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userAgent">
+                                <i class="fa-solid fa-mobile-screen"></i> User Agent
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="userAgent"
+                                    placeholder="Bos birakilirsa varsayilan kullanilir"
+                                    style="font-family: 'Courier New', monospace; font-size: 0.8rem;">
+                            </div>
+                            <span class="input-hint">Proxy aracindan alinan User-Agent degeri</span>
+                        </div>
+                    </div>
+
+                    <hr class="divider">
+
+                    <button type="submit" class="btn" id="loginBtn">
+                        <i class="fa-solid fa-sign-in-alt"></i> Giris Yap
+                    </button>
+                </form>
+
+                <div class="links">
+                    <a href="/"><i class="fa-solid fa-home"></i> Ana Sayfa</a>
+                    <span class="sep">|</span>
+                    <a href="/admin"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p style="color: var(--text-secondary);">Instagram'a baglaniliyor...</p>
+                <p id="loadingStep" style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;"></p>
+            </div>
+
+            <!-- Success -->
+            <div class="success-animation" id="successView">
+                <div class="success-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="success-text" id="successText">Giris Basarili!</div>
+                <div class="success-sub" id="successSub"></div>
+                <div class="success-actions">
+                    <a href="/admin" class="success-btn primary">
+                        <i class="fa-solid fa-users"></i> Hesaplari Yonet
+                    </a>
+                    <button class="success-btn" onclick="resetForm()">
+                        <i class="fa-solid fa-plus"></i> Baska Hesap Ekle
+                    </button>
+                    <a href="/" class="success-btn">
+                        <i class="fa-solid fa-home"></i> Ana Sayfa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePass() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('passIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function toggleAdvanced() {
+            const fields = document.getElementById('optionalFields');
+            const toggle = document.getElementById('advancedToggle');
+            fields.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        function showAlert(message, type = 'error') {
+            const box = document.getElementById('alertBox');
+            const icon = type === 'error' ? 'fa-circle-exclamation' :
+                         type === 'success' ? 'fa-check-circle' :
+                         'fa-exclamation-triangle';
+            box.className = `alert ${type}`;
+            box.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 6000);
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const accountLabel = document.getElementById('accountLabel').value.trim();
+            const deviceId = document.getElementById('deviceId').value.trim();
+            const androidId = document.getElementById('androidId').value.trim();
+            const userAgent = document.getElementById('userAgent').value.trim();
+
+            if (!username || !password) {
+                showAlert('Kullanici adi ve sifre gerekli!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loginForm').style.display = 'none';
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+            const stepEl = document.getElementById('loadingStep');
+
+            const steps = [
+                'Cihaz bilgileri hazirlaniyor...',
+                'Instagram sunucusuna baglaniliyor...',
+                'Giris yapiliyor...',
+                'Token olusturuluyor...',
+                'Hesap kaydediliyor...'
+            ];
+
+            let stepIdx = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIdx < steps.length) {
+                    stepEl.textContent = steps[stepIdx];
+                    stepIdx++;
+                }
+            }, 2000);
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        account_label: accountLabel,
+                        device_id: deviceId || null,
+                        android_id: androidId || null,
+                        user_agent: userAgent || null,
+                    })
+                });
+
+                const data = await response.json();
+                clearInterval(stepInterval);
+
+                if (response.ok && data.success) {
+                    // Show success
+                    spinner.style.display = 'none';
+                    const successView = document.getElementById('successView');
+                    successView.style.display = 'block';
+                    document.getElementById('successText').textContent = 'Giris Basarili!';
+                    document.getElementById('successSub').textContent =
+                        `@${data.username} hesabi eklendi. Simdi analiz yapabilirsiniz.`;
+                } else {
+                    // Show error
+                    spinner.style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'block';
+
+                    let errorMsg = data.error || 'Giris basarisiz!';
+                    if (data.error_type === 'checkpoint') {
+                        errorMsg += ' Instagram uygulamasindan giris yapip dogrulama tamamlayin, sonra tekrar deneyin.';
+                    } else if (data.error_type === 'invalid_credentials') {
+                        errorMsg += ' Kullanici adi ve sifrenizi kontrol edin.';
+                    } else if (data.error_type === 'rate_limit') {
+                        errorMsg += ' Birkaç dakika bekleyip tekrar deneyin.';
+                    }
+
+                    showAlert(errorMsg, data.error_type === 'checkpoint' ? 'warning' : 'error');
+                }
+
+            } catch (err) {
+                clearInterval(stepInterval);
+                spinner.style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+                showAlert('Baglanti hatasi: ' + err.message);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('successView').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('accountLabel').value = '';
+            document.getElementById('deviceId').value = '';
+            document.getElementById('androidId').value = '';
+            document.getElementById('userAgent').value = '';
+            hideAlert();
+        }
+    </script>
+</body>
+
+</html>
